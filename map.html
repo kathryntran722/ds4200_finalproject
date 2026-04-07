@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Cancer Studies by Continent</title>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://unpkg.com/topojson-client@3/dist/topojson-client.min.js"></script>
   <style>
-    body { font-family: sans-serif; margin: 0; padding: 24px; background: #fff; color: #333; }
     h2   { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
     p.sub { font-size: 13px; color: #666; margin-bottom: 20px; }
     .country { stroke: #fff; stroke-width: 0.4; transition: opacity 0.2s; cursor: pointer; }
@@ -21,6 +22,16 @@
 </head>
 <body>
 
+<nav>
+  <span class="nav-title">Cancer Genetics Viz</span>
+  <a href="main_page.html">Home</a>
+  <a href="viz1_phenotypes.html">Viz 1</a>
+  <a href="linechart.html">Viz 2</a>
+  <a href="sankey_cancer.html">Viz 3</a>
+  <a href="scatter_cancer.html">Viz 4</a>
+  <a href="map.html" class="active">Viz 5</a>
+</nav>
+
 <h2>Cancer–gene association studies by continent</h2>
 <p class="sub">Hover over a continent to see the number of studies conducted there.</p>
 <svg id="map"></svg>
@@ -29,9 +40,7 @@
 <script>
 const W = 1000, H = 700;
 
-// ISO numeric ID → continent, built from authoritative UN M49 standard
 const C = {
-  // Africa
   12:'Africa',24:'Africa',72:'Africa',108:'Africa',120:'Africa',132:'Africa',140:'Africa',
   174:'Africa',175:'Africa',178:'Africa',180:'Africa',204:'Africa',226:'Africa',
   231:'Africa',232:'Africa',262:'Africa',266:'Africa',270:'Africa',288:'Africa',324:'Africa',
@@ -41,14 +50,12 @@ const C = {
   694:'Africa',706:'Africa',710:'Africa',716:'Africa',728:'Africa',729:'Africa',736:'Africa',
   748:'Africa',768:'Africa',788:'Africa',800:'Africa',818:'Africa',834:'Africa',854:'Africa',
   894:'Africa',
-  // Asia (includes Middle East)
   4:'Asia',48:'Asia',50:'Asia',51:'Asia',64:'Asia',96:'Asia',104:'Asia',116:'Asia',
   156:'Asia',162:'Asia',268:'Asia',356:'Asia',360:'Asia',364:'Asia',368:'Asia',376:'Asia',
   392:'Asia',398:'Asia',400:'Asia',408:'Asia',410:'Asia',414:'Asia',418:'Asia',422:'Asia',
   458:'Asia',462:'Asia',496:'Asia',512:'Asia',524:'Asia',586:'Asia',608:'Asia',634:'Asia',
   682:'Asia',702:'Asia',704:'Asia',760:'Asia',762:'Asia',764:'Asia',784:'Asia',792:'Asia',
   795:'Asia',860:'Asia',887:'Asia',158:'Asia',
-  // Europe
   8:'Europe',20:'Europe',40:'Europe',56:'Europe',70:'Europe',100:'Europe',112:'Europe',
   191:'Europe',203:'Europe',208:'Europe',233:'Europe',246:'Europe',250:'Europe',276:'Europe',
   292:'Europe',300:'Europe',336:'Europe',348:'Europe',352:'Europe',372:'Europe',380:'Europe',
@@ -56,7 +63,6 @@ const C = {
   499:'Europe',528:'Europe',578:'Europe',616:'Europe',620:'Europe',642:'Europe',643:'Europe',
   674:'Europe',688:'Europe',703:'Europe',705:'Europe',724:'Europe',752:'Europe',756:'Europe',
   804:'Europe',807:'Europe',826:'Europe',831:'Europe',832:'Europe',833:'Europe',744:'Europe',
-  // North America
   28:'North America',44:'North America',52:'North America',84:'North America',
   124:'North America',188:'North America',192:'North America',212:'North America',
   214:'North America',222:'North America',308:'North America',320:'North America',
@@ -64,18 +70,15 @@ const C = {
   484:'North America',558:'North America',591:'North America',630:'North America',
   659:'North America',660:'North America',662:'North America',670:'North America',
   780:'North America',796:'North America',840:'North America',
-  // South America
   32:'South America',68:'South America',76:'South America',152:'South America',
   170:'South America',218:'South America',238:'South America',254:'South America',
   328:'South America',600:'South America',604:'South America',740:'South America',
   858:'South America',862:'South America',
-  // Oceania
   36:'Oceania',184:'Oceania',242:'Oceania',296:'Oceania',316:'Oceania',520:'Oceania',
   540:'Oceania',554:'Oceania',570:'Oceania',574:'Oceania',580:'Oceania',583:'Oceania',
   584:'Oceania',585:'Oceania',598:'Oceania',612:'Oceania',882:'Oceania',
 };
 
-// Your dataset continent names → lookup key
 const DATA_TO_KEY = {
   'Asia':'Asia','Europe':'Europe','North America':'North America',
   'Africa':'Africa','Middle East':'Asia','Australia':'Oceania','South America':'South America'
@@ -96,7 +99,6 @@ Promise.all([
   d3.json('map_data.json')
 ]).then(([world, mapData]) => {
 
-  // Build studies lookup
   const studiesByKey = {};
   const originalData = {};
   mapData.forEach(d => {
@@ -104,8 +106,6 @@ Promise.all([
     const key = DATA_TO_KEY[d.continent];
     if (key) studiesByKey[key] = (studiesByKey[key] || 0) + d.studies;
   });
-
-  console.log('studiesByKey:', studiesByKey);
 
   const maxVal = d3.max(Object.values(studiesByKey));
   const colorScale = d3.scaleSequential().domain([0, maxVal]).interpolator(d3.interpolateBlues);
@@ -141,7 +141,6 @@ Promise.all([
     })
     .on('mouseleave', () => tooltip.style('opacity', 0));
 
-  // Legend
   const legendW = 200, legendH = 12;
   const legendX = W - legendW - 40, legendY = H - 50;
   const defs = svg.append('defs');

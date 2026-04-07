@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cancer Genetics — DS4200</title>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <span class="nav-title">Cancer Genetics Viz</span>
+  <a href="main_page.html" class="active">Home</a>
+  <a href="viz1_phenotypes.html">Viz 1</a>
+  <a href="linechart.html">Viz 2</a>
+  <a href="sankey_cancer.html">Viz 3</a>
+  <a href="scatter_cancer.html">Viz 4</a>
+  <a href="map.html">Viz 5</a>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <h1>Exploring Cancer–Gene Associations</h1>
+    <p>An interactive data visualization project using the Genetic Association Database (GAD)
+       to uncover patterns in how genes, chromosomes, and cancer types have been studied worldwide.</p>
+  </div>
+
+  <!-- MOTIVATION -->
+  <h2>Motivation</h2>
+
+  <!-- DATA INTRODUCTION -->
+  <h2>About the Data</h2>
+  <p>
+    This project uses the <strong>Genetic Association Database (GAD)</strong>, a curated
+    archive of published human genetic association studies. We focus specifically on the
+    cancer subset of this database.
+  </p>
+
+  <div class="finding">
+    <h3>Dataset size</h3>
+    <p>The dataset contains approximately <strong>5,000+ records</strong>, each representing
+       one published study. Studies span from 1999 to 2006 and cover hundreds of genes
+       across all 23 human chromosomes.</p>
+  </div>
+
+  <div class="finding">
+    <h3>Key attributes</h3>
+    <p>Each record includes the following fields:</p>
+    <ul style="margin-top:8px; padding-left:20px; font-size:15px; color:#555; line-height:2;">
+      <li><strong>gene</strong> — the gene variant being studied (e.g. ABCB1, BRCA1)</li>
+      <li><strong>phenotype</strong> — the cancer type being investigated (e.g. breast cancer, leukemia)</li>
+      <li><strong>association</strong> — whether the study found a significant link: Y (yes), N (no), or blank (not coded)</li>
+      <li><strong>chromosome / chromosome_band</strong> — the genomic location of the gene</li>
+      <li><strong>year</strong> — the publication year of the study</li>
+      <li><strong>population / continent</strong> — the geographic or ethnic group studied</li>
+      <li><strong>reference / pubmed_id</strong> — the source publication</li>
+    </ul>
+  </div>
+
+  <div class="finding">
+    <h3>Important note on the association field</h3>
+    <p>
+      The majority of entries have a <em>blank</em> association value — this does not mean
+      no association was found. It means the GAD curators did not code that entry. Only
+      entries explicitly marked Y or N should be interpreted as confirmed or denied associations.
+    </p>
+  </div>
+
+  <!-- VISUALIZATIONS -->
+  <h2>Visualizations</h2>
+  <div class="viz-grid">
+
+    <a class="viz-card" href="viz1_phenotypes.html">
+      <div class="viz-number">Viz 01</div>
+      <h3>Top 5 Phenotypes</h3>
+      <p>How has cancer research grown year by year, and which phenotypes drove each era?</p>
+      <span class="tag altair">Altair</span>
+    </a>
+
+    <a class="viz-card" href="linechart.html">
+      <div class="viz-number">Viz 02</div>
+      <h3>Cancer–Gene Association Studies Over Time</h3>
+      <p>What genes were studied the most year after year?</p>
+      <span class="tag d3">D3</span>
+    </a>
+
+    <a class="viz-card" href="sankey_cancer.html">
+      <div class="viz-number">Viz 03</div>
+      <h3>Chromosome → gene → cancer Sankey</h3>
+      <p>How do chromosomes, genes, and cancer types flow into one another?</p>
+    </a>
+
+    <a class="viz-card" href="scatter_cancer.html">
+      <div class="viz-number">Viz 04</div>
+      <h3>Genetic Association Over Time</h3>
+      <p>How has genetic associations evolved over the years by cancer type?</p>
+    </a>
+
+    <a class="viz-card" href="map.html">
+      <div class="viz-number">Viz 05</div>
+      <h3>Cancer-Gene studies map</h3>
+      <p>Where in the world are cancer-gene studies being conducted?</p>
+      <span class="tag d3">D3</span>
+    </a>
+
+  </div>
+
+   <!-- SUMMARY -->
+  <h2 id="summary">Summary</h2>
+  <p>
+    Across five visualizations, this project surfaces several patterns in how cancer–gene
+    association research has evolved over time and across the globe. Fill in your key
+    findings below.
+  </p>
+
+  <div class="finding">
+    <h3>Finding 1 — [Title]</h3>
+    <p>Write your summary finding here.</p>
+  </div>
+
+  <div class="finding">
+    <h3>Finding 2 — [Title]</h3>
+    <p>Write your summary finding here.</p>
+  </div>
+
+  <div class="finding">
+    <h3>Finding 3 — [Title]</h3>
+    <p>Write your summary finding here.</p>
+  </div>
+
+  <div class="finding">
+    <h3>Finding 4 — [Title]</h3>
+    <p>Write your summary finding here.</p>
+  </div>
+
+  <div class="finding">
+    <h3>Finding 5 — [Title]</h3>
+    <p>Write your summary finding here.</p>
+  </div>
+
+  <!-- REFERENCES -->
+  <h2>References</h2>
+  <ul class="references">
+    <li>
+      Becker KG et al. (2004). The genetic association database.
+      <a href="https://www.nature.com/articles/ng1414" target="_blank">Nature Genetics, 36, 431–432</a>
+    </li>
+    <li>
+      GAD Dataset source:
+      <a href="https://geneticassociationdb.nih.gov/" target="_blank">geneticassociationdb.nih.gov</a>
+    </li>
+  </ul>
+
+</div>
+
+<footer>DS4200 — Information Presentation &amp; Visualization &nbsp;|&nbsp; Northeastern University</footer>
+
+</body>
+</html>

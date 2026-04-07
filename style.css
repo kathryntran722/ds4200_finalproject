@@ -1,0 +1,258 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  color: #333;
+  background: #fafafa;
+  line-height: 1.7;
+}
+
+/* ── Nav ── */
+nav {
+  background: #1a1a2e;
+  padding: 14px 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+nav a {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+nav a:hover,
+nav a.active {
+  background: #7F77DD;
+  color: #fff;
+}
+
+nav .nav-title {
+  color: #fff;
+  font-family: 'Merriweather', serif;
+  font-size: 15px;
+  font-weight: 700;
+  margin-right: auto;
+}
+
+/* ── Page wrapper ── */
+.page {
+  max-width: 960px;
+  margin: 48px auto;
+  padding: 0 24px;
+}
+
+/* ── Hero (index only) ── */
+.hero {
+  text-align: center;
+  padding: 60px 24px 40px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 48px;
+}
+
+.hero h1 {
+  font-family: 'Merriweather', serif;
+  font-size: 32px;
+  color: #1a1a2e;
+  margin-bottom: 12px;
+}
+
+.hero p {
+  font-size: 16px;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto 24px;
+}
+
+/* ── Section headings ── */
+h2 {
+  font-family: 'Merriweather', serif;
+  font-size: 22px;
+  color: #1a1a2e;
+  margin-bottom: 12px;
+  margin-top: 40px;
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 8px;
+  margin-top: 24px;
+}
+
+p {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+/* ── Viz cards ── */
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.viz-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 20px;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.2s, transform 0.2s;
+  display: block;
+}
+
+.viz-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.viz-card .viz-number {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #7F77DD;
+  margin-bottom: 6px;
+}
+
+.viz-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 6px;
+}
+
+.viz-card p {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+.viz-card .tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.tag.altair { background: #e1f5ee; color: #0f6e56; }
+.tag.d3     { background: #e6f1fb; color: #185fa5; }
+
+/* ── Viz page layout ── */
+.viz-page-header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.viz-page-header .tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.viz-page-header h1 {
+  font-family: 'Merriweather', serif;
+  font-size: 26px;
+  color: #1a1a2e;
+  margin-bottom: 8px;
+}
+
+.viz-page-header p {
+  font-size: 15px;
+  color: #666;
+  max-width: 700px;
+}
+
+.viz-container {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.takeaway {
+  background: #f0effe;
+  border-left: 4px solid #7F77DD;
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  margin-bottom: 32px;
+}
+
+.takeaway h3 {
+  color: #534AB7;
+  margin-top: 0;
+  margin-bottom: 6px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.takeaway p {
+  margin: 0;
+  font-size: 14px;
+  color: #444;
+}
+
+/* ── Summary page ── */
+.finding {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.finding h3 {
+  color: #1a1a2e;
+  margin-top: 0;
+}
+
+/* ── References ── */
+.references {
+  margin-top: 12px;
+  padding-left: 20px;
+}
+
+.references li {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.references a {
+  color: #7F77DD;
+  text-decoration: none;
+}
+
+.references a:hover { text-decoration: underline; }
+
+/* ── Footer ── */
+footer {
+  text-align: center;
+  padding: 32px;
+  font-size: 13px;
+  color: #aaa;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 64px;
+}

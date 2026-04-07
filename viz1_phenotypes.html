@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   <style>
     #vis.vega-embed {
       width: 100%;
@@ -12,11 +15,21 @@
       position: relative;
     }
   </style>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.8.0"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@6"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@6.1.0"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@7"></script>
 </head>
 <body>
+
+<nav>
+  <span class="nav-title">Cancer Genetics Viz</span>
+  <a href="main_page.html">Home</a>
+  <a href="viz1_phenotypes.html" class="active">Viz 1</a>
+  <a href="linechart.html">Viz 2</a>
+  <a href="sankey_cancer.html">Viz 3</a>
+  <a href="scatter_cancer.html" >Viz 4</a>
+  <a href="map.html">Viz 5</a>
+</nav>
   <div id="vis"></div>
   <script>
     (function(vegaEmbed) {

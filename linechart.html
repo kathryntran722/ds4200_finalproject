@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cancer Gene Studies Over Time</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 24px; background: #fff; color: #333; }
+    h2   { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+    p.sub { font-size: 13px; color: #666; margin-bottom: 20px; }
+
+    .axis path, .axis line { stroke: #ddd; }
+    .axis text { font-size: 12px; fill: #666; }
+    .chart-title { font-size: 14px; font-weight: 500; fill: #333; }
+    .chart-sub   { font-size: 12px; fill: #999; }
+
+    .line-total { fill: none; stroke: #7F77DD; stroke-width: 2.5; }
+    .area-total { fill: #7F77DD; fill-opacity: 0.12; }
+    .gene-line  { fill: none; stroke-width: 2; opacity: 0.85; transition: opacity 0.2s, stroke-width 0.2s; }
+    .gene-line.faded { opacity: 0.1; }
+
+    .brush .selection {
+      fill: #7F77DD; fill-opacity: 0.12;
+      stroke: #7F77DD; stroke-width: 1px;
+    }
+
+    #tooltip {
+      position: absolute; background: rgba(0,0,0,0.75); color: #fff;
+      padding: 6px 10px; border-radius: 6px; font-size: 12px;
+      pointer-events: none; opacity: 0; transition: opacity 0.15s;
+    }
+    .hover-dot { stroke: #fff; stroke-width: 2; opacity: 0; pointer-events: none; }
+
+    #legend {
+      display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 6px; font-size: 12px;
+      color: #444; cursor: pointer; padding: 2px 6px; border-radius: 4px;
+      transition: background 0.15s;
+    }
+    .legend-item:hover { background: #f0f0f0; }
+    .legend-item.faded { opacity: 0.35; }
+    .legend-swatch { width: 24px; height: 3px; border-radius: 2px; }
+
+    .reset-btn {
+      font-size: 12px; padding: 3px 10px; cursor: pointer;
+      border: 1px solid #ccc; border-radius: 4px;
+      background: #fff; color: #444; margin-left: 12px;
+    }
+    .reset-btn:hover { background: #f5f5f5; }
+    #hint { font-size: 12px; color: #7F77DD; margin-top: 8px; min-height: 18px; }
+  </style>
+</head>
+<body>
+
+<h2>Cancer–gene association studies over time</h2>
+<p class="sub">
+  Brush on the left chart to see the top 5 gene breakdown on the right.
+  <button class="reset-btn" id="reset">Reset</button>
+</p>
+
+<div style="display:flex; gap:40px; align-items:flex-start;">
+  <div><svg id="svg-left"></svg></div>
+  <div>
+    <svg id="svg-right"></svg>
+    <div id="legend"></div>
+    <div id="hint">← Drag on the left chart to see gene breakdown</div>
+  </div>
+</div>
+<div id="tooltip"></div>
+
+<script>
+const W = 700, H = 700;
+const M = { top: 50, right: 20, bottom: 40, left: 55 };
+const COLORS = ['#7F77DD', '#1D9E75', '#D85A30', '#D4537E', '#BA7517'];
+
+Promise.all([
+  d3.json('timeline_data.json'),
+  d3.json('timeline_genes.json')
+]).then(([totalData, geneData]) => {
+
+  totalData.forEach(d => d.year = new Date(d.year, 0, 1));
+  geneData.forEach(d => d.year = new Date(d.year, 0, 1));
+
+  const fullDomain = d3.extent(totalData, d => d.year);
+  const color = d3.scaleOrdinal().range(COLORS);
+  let activeGenes = new Set();
+
+  // =====================
+  // LEFT CHART — total trend
+  // =====================
+  const svgL = d3.select('#svg-left').attr('width', W).attr('height', H);
+
+  const xL = d3.scaleTime().domain(fullDomain).range([M.left, W - M.right]);
+  const yL = d3.scaleLinear()
+    .domain([0, d3.max(totalData, d => d.count) * 1.1]).nice()
+    .range([H - M.bottom, M.top]);
+
+  svgL.append('defs').append('clipPath').attr('id', 'clip-left')
+    .append('rect').attr('x', M.left).attr('y', M.top)
+    .attr('width', W - M.left - M.right).attr('height', H - M.top - M.bottom);
+
+  const leftG = svgL.append('g').attr('clip-path', 'url(#clip-left)');
+
+  leftG.append('path').datum(totalData)
+    .attr('class', 'area-total')
+    .attr('d', d3.area().x(d => xL(d.year)).y0(yL(0)).y1(d => yL(d.count)));
+
+  leftG.append('path').datum(totalData)
+    .attr('class', 'line-total')
+    .attr('d', d3.line().x(d => xL(d.year)).y(d => yL(d.count)));
+
+  svgL.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${H - M.bottom})`)
+    .call(d3.axisBottom(xL).ticks(6).tickFormat(d3.timeFormat('%Y')));
+
+  svgL.append('g').attr('class', 'axis')
+    .attr('transform', `translate(${M.left},0)`)
+    .call(d3.axisLeft(yL).ticks(6));
+
+  svgL.append('text').attr('transform', 'rotate(-90)')
+    .attr('x', -(H / 2)).attr('y', 14).attr('text-anchor', 'middle')
+    .attr('font-size', 12).attr('fill', '#888').text('Number of studies');
+
+  svgL.append('text').attr('class', 'chart-title')
+    .attr('x', M.left).attr('y', 18).text('Overall study trend');
+  svgL.append('text').attr('class', 'chart-sub')
+    .attr('x', M.left).attr('y', 34).text('All genes combined');
+
+  // Hover tooltip
+  const tooltip = d3.select('#tooltip');
+  const bisect = d3.bisector(d => d.year).left;
+  const dot = svgL.append('circle').attr('class', 'hover-dot').attr('r', 5).attr('fill', '#7F77DD');
+
+  svgL.append('rect')
+    .attr('x', M.left).attr('y', M.top)
+    .attr('width', W - M.left - M.right).attr('height', H - M.top - M.bottom)
+    .attr('fill', 'transparent').style('pointer-events', 'none');
+
+  svgL.on('mousemove', function(event) {
+    const [mx] = d3.pointer(event, svgL.node());
+    if (mx < M.left || mx > W - M.right) return;
+    const x0 = xL.invert(mx);
+    const i = bisect(totalData, x0, 1);
+    if (i >= totalData.length) return;
+    const d = totalData[i];
+    dot.attr('cx', xL(d.year)).attr('cy', yL(d.count)).style('opacity', 1);
+    tooltip.style('opacity', 1)
+      .style('left', (event.pageX + 14) + 'px')
+      .style('top', (event.pageY - 32) + 'px')
+      .html(`<strong>${d.year.getFullYear()}</strong>: ${d.count} studies`);
+  }).on('mouseleave', () => {
+    dot.style('opacity', 0);
+    tooltip.style('opacity', 0);
+  });
+
+  // Brush
+  const brush = d3.brushX()
+    .extent([[M.left, M.top], [W - M.right, H - M.bottom]])
+    .on('brush end', brushed);
+
+  svgL.append('g').attr('class', 'brush').call(brush);
+
+  // =====================
+  // RIGHT CHART — gene breakdown
+  // =====================
+  const svgR = d3.select('#svg-right').attr('width', W).attr('height', H);
+
+  const xR = d3.scaleTime().domain(fullDomain).range([M.left, W - M.right]);
+  const yR = d3.scaleLinear()
+    .domain([0, d3.max(geneData, d => d.count) * 1.1]).nice()
+    .range([H - M.bottom, M.top]);
+
+  svgR.append('defs').append('clipPath').attr('id', 'clip-right')
+    .append('rect').attr('x', M.left).attr('y', M.top)
+    .attr('width', W - M.left - M.right).attr('height', H - M.top - M.bottom);
+
+  const rightG = svgR.append('g').attr('clip-path', 'url(#clip-right)');
+
+  const placeholder = svgR.append('text')
+    .attr('x', W / 2).attr('y', H / 2)
+    .attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', '#bbb')
+    .text('Brush the left chart to see gene breakdown');
+
+  const xAxisR = svgR.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${H - M.bottom})`)
+    .call(d3.axisBottom(xR).ticks(6).tickFormat(d3.timeFormat('%Y')));
+
+  svgR.append('g').attr('class', 'axis')
+    .attr('transform', `translate(${M.left},0)`)
+    .call(d3.axisLeft(yR).ticks(6));
+
+  svgR.append('text').attr('transform', 'rotate(-90)')
+    .attr('x', -(H / 2)).attr('y', 14).attr('text-anchor', 'middle')
+    .attr('font-size', 12).attr('fill', '#888').text('Number of studies');
+
+  svgR.append('text').attr('class', 'chart-title')
+    .attr('x', M.left).attr('y', 18).text('Top 5 genes in selected range');
+  const rightSub = svgR.append('text').attr('class', 'chart-sub')
+    .attr('x', M.left).attr('y', 34).text('Select a range on the left');
+
+  // =====================
+  // BRUSH HANDLER
+  // =====================
+  function brushed(event) {
+    if (!event.selection) return;
+    const [x0, x1] = event.selection.map(xL.invert);
+
+    // Find top 5 genes in range
+    const inRange = geneData.filter(d => d.year >= x0 && d.year <= x1);
+    const totals = d3.rollup(inRange, v => d3.sum(v, d => d.count), d => d.gene);
+    const top5 = [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(d => d[0]);
+
+    color.domain(top5);
+    activeGenes = new Set(top5);
+
+    const geneGroups = top5.map(g => ({
+      gene: g,
+      values: geneData.filter(d => d.gene === g && d.year >= x0 && d.year <= x1)
+        .sort((a, b) => a.year - b.year)
+    }));
+
+    xR.domain([x0, x1]);
+    xAxisR.call(d3.axisBottom(xR).ticks(5).tickFormat(d3.timeFormat('%Y')));
+
+    const geneLine = d3.line()
+      .x(d => xR(d.year)).y(d => yR(d.count));
+
+    rightG.selectAll('.gene-line').remove();
+    rightG.selectAll('.gene-line')
+      .data(geneGroups).join('path')
+      .attr('class', 'gene-line')
+      .attr('stroke', d => color(d.gene))
+      .attr('d', d => geneLine(d.values));
+
+    placeholder.style('display', 'none');
+    rightSub.text(`${x0.getFullYear()}–${x1.getFullYear()}`);
+    d3.select('#hint').style('opacity', 0);
+    buildLegend(top5);
+  }
+
+  // =====================
+  // RESET
+  // =====================
+  function resetAll() {
+    svgL.select('.brush').call(brush.move, null);
+    xR.domain(fullDomain);
+    xAxisR.call(d3.axisBottom(xR).ticks(6).tickFormat(d3.timeFormat('%Y')));
+    rightG.selectAll('.gene-line').remove();
+    placeholder.style('display', null);
+    rightSub.text('Select a range on the left');
+    d3.select('#hint').style('opacity', 1);
+    d3.select('#legend').selectAll('*').remove();
+  }
+
+  d3.select('#reset').on('click', resetAll);
+
+  // =====================
+  // LEGEND
+  // =====================
+  function buildLegend(top5) {
+    const legend = d3.select('#legend');
+    legend.selectAll('*').remove();
+    top5.forEach(g => {
+      const item = legend.append('div').attr('class', 'legend-item')
+        .on('click', () => {
+          const onlyThis = activeGenes.size === 1 && activeGenes.has(g);
+          activeGenes = onlyThis ? new Set(top5) : new Set([g]);
+          rightG.selectAll('.gene-line')
+            .classed('faded', d => !activeGenes.has(d.gene))
+            .attr('stroke-width', d => activeGenes.size === 1 && activeGenes.has(d.gene) ? 3.5 : 2);
+          legend.selectAll('.legend-item')
+            .classed('faded', (_, i) => !activeGenes.has(top5[i]));
+        });
+      item.append('div').attr('class', 'legend-swatch').style('background', color(g));
+      item.append('span').text(g);
+    });
+  }
+
+});
+</script>
+</body>
+</html>

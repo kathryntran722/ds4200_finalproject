@@ -81,6 +81,35 @@
 </div>
 <div id="tooltip"></div>
 
+<div style="padding: 0 24px 40px;">
+  <div class="takeaway">
+    <h3>Analysis</h3>
+    <p>
+      Cancer–gene association research grew slowly through the 1980s and 1990s before
+      experiencing a dramatic surge in the early 2000s, peaking in 2005 with over 1,200
+      studies published in a single year. This boom coincides with major advances in genotyping
+      technology and the completion of the Human Genome Project in 2003, which made large-scale
+      genetic association studies far more feasible. The sharp drop-off after 2006 likely reflects
+      the boundaries of this dataset rather than a true decline in research activity.
+      Across the full time range, the top genes are dominated by metabolic and detoxification
+      enzymes, GSTM1, GSTT1, CYP1A1, and NAT2, alongside the tumor suppressor TP53.
+      GSTM1 leads consistently throughout the boom period, reflecting sustained interest in how
+      glutathione S-transferase variants influence cancer susceptibility across multiple cancer types.
+      TP53 shows the longest historical presence, with activity dating back to the early 1990s,
+      underscoring its foundational role in cancer biology research. 
+    </p>
+    <p>
+      Zooming into the peak period of 2004–2006 reveals a shift in the research landscape:
+      XRCC1 and ERCC2, both DNA repair genes, rise to prominence alongside GSTM1 and GSTT1,
+      suggesting that as the field matured, attention broadened from metabolic susceptibility
+      toward DNA damage response mechanisms. GSTT1 peaks sharply around 2004 before declining,
+      a pattern consistent with a gene becoming well-characterized and attracting diminishing
+      new research interest.
+    </p>
+  </div>
+</div>
+<div id="tooltip"></div>
+
 <script>
 const W = 700, H = 700;
 const M = { top: 50, right: 20, bottom: 40, left: 55 };
@@ -198,7 +227,7 @@ Promise.all([
     .attr('transform', `translate(0,${H - M.bottom})`)
     .call(d3.axisBottom(xR).ticks(6).tickFormat(d3.timeFormat('%Y')));
 
-  svgR.append('g').attr('class', 'axis')
+svgR.append('g').attr('class', 'axis y-axis-right')
     .attr('transform', `translate(${M.left},0)`)
     .call(d3.axisLeft(yR).ticks(6));
 
@@ -219,7 +248,7 @@ Promise.all([
     const [x0, x1] = event.selection.map(xL.invert);
 
     // Find top 5 genes in range
-    const inRange = geneData.filter(d => d.year >= x0 && d.year <= x1);
+    const inRange = geneData.filter(d => d.year >= new Date(x0.getFullYear(), 0, 1) && d.year <= new Date(x1.getFullYear(), 11, 31));
     const totals = d3.rollup(inRange, v => d3.sum(v, d => d.count), d => d.gene);
     const top5 = [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(d => d[0]);
 
@@ -228,12 +257,19 @@ Promise.all([
 
     const geneGroups = top5.map(g => ({
       gene: g,
-      values: geneData.filter(d => d.gene === g && d.year >= x0 && d.year <= x1)
+      values: geneData.filter(d => d.gene === g && d.year >= new Date(x0.getFullYear(), 0, 1) && d.year <= new Date(x1.getFullYear(), 11, 31))
         .sort((a, b) => a.year - b.year)
     }));
 
-    xR.domain([x0, x1]);
-    xAxisR.call(d3.axisBottom(xR).ticks(5).tickFormat(d3.timeFormat('%Y')));
+    xR.domain([new Date(x0.getFullYear(), 0, 1), new Date(x1.getFullYear(), 11, 31)]);
+    const yearSpan = x1.getFullYear() - x0.getFullYear();
+    xAxisR.call(d3.axisBottom(xR)
+      .ticks(Math.min(yearSpan + 1, 10))
+      .tickFormat(d3.timeFormat('%Y')));
+
+    const visibleMax = d3.max(geneGroups, g => d3.max(g.values, d => d.count)) || 1;
+    yR.domain([0, visibleMax * 1.2]).nice();
+    svgR.select('.y-axis-right').call(d3.axisLeft(yR).ticks(6));
 
     const geneLine = d3.line()
       .x(d => xR(d.year)).y(d => yR(d.count));

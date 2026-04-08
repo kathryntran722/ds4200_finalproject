@@ -32,10 +32,30 @@
   <a href="scatter_cancer.html">Viz 5</a>
 </nav>
 
-<h2>Cancer–gene association studies by continent</h2>
-<p class="sub">Hover over a continent to see the number of studies conducted there.</p>
-<svg id="map"></svg>
-<div id="tooltip"></div>
+<div style="padding: 24px 24px 0;">
+  <h2>Cancer–gene association studies by continent</h2>
+  <p class="sub">Hover over a continent to see the number of studies conducted there.</p>
+</div>
+
+<div style="display: flex; align-items: flex-start; gap: 32px; padding: 0 24px 40px;">
+  <div style="flex-shrink: 0;">
+    <svg id="map"></svg>
+  </div>
+  <div id="tooltip"></div>
+  <div class="takeaway" style="margin-top: 0; align-self: center;">
+    <h3>Analysis</h3>
+    <p>
+      Asia dominates cancer–gene association research, contributing the most studies by a wide margin
+      (up to 631), driven largely by East and South Asian countries such as Japan, China, and India.
+      Europe and North America follow at moderate levels, reflecting their well-established research
+      infrastructure. Africa and South America are notably underrepresented, with very few studies
+      recorded across the entire continent, a stark gap that likely reflects disparities in research
+      funding, institutional capacity, and access to genomic technologies. This geographic skew is
+      important to keep in mind when interpreting findings: the genes and associations identified in
+      this dataset may not generalize equally across all human populations.
+    </p>
+  </div>
+</div>
 
 <script>
 const W = 1000, H = 700;

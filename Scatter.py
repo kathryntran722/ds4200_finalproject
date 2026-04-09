@@ -2,14 +2,14 @@
 Scatter Plot: Publication Year vs. Confirmed Associations per Cancer Phenotype
 Requires: pip install altair pandas openpyxl
 
-Run: python scatter_cancer.py
+Run: python Scatter.py
 Outputs: scatter_cancer.html
 """
 
 import pandas as pd
 import altair as alt
 
-# ── Load & filter data ─────────────────────────────────────────────────────────
+# ── Load & filter data ────────────────────────────────────────────────────────
 df = pd.read_excel("cancer_data.xlsx")
 df = df[df["association"] == "Y"].dropna(subset=["year"]).copy()
 df["year"] = df["year"].astype(int)
@@ -37,7 +37,7 @@ color_scale = alt.Scale(
     ],
 )
 
-# ── Selection: nothing selected by default ────────────────────────────────────
+# ── Selection ─────────────────────────────────────────────────────────────────
 phenotype_selection = alt.selection_point(fields=["phenotype"], bind="legend")
 
 # ── Scatter layer ─────────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ scatter = (
     .add_params(phenotype_selection)
 )
 
-# ── Trend line: transform_filter means it only draws for selected phenotype(s) ─
+# ── Trend line ────────────────────────────────────────────────────────────────
 trend = (
     alt.Chart(agg)
     .transform_filter(phenotype_selection)
@@ -105,7 +105,7 @@ chart = (
     .properties(
         title=alt.TitleParams(
             text="Genetic Associations Over Time by Cancer Phenotype",
-            subtitle="Confirmed gene–cancer associations (Y) · Click legend to filter · Bubble size = association count · Dashed Lines = Line of Best Fit",
+            subtitle="Confirmed gene-cancer associations (Y) · Click legend to filter · Bubble size = association count · Dashed Lines = Line of Best Fit",
             color="#f0e9d6",
             subtitleColor="#7a8899",
             fontSize=18,
@@ -130,4 +130,48 @@ chart = (
 )
 
 chart.save("scatter_cancer.html")
+
+# ── Inject nav + analysis into the saved HTML ─────────────────────────────────
+with open("scatter_cancer.html", "r") as f:
+    content = f.read()
+
+nav = """<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <span class="nav-title">Cancer Genetics Viz</span>
+  <a href="main_page.html">Home</a>
+  <a href="map.html">Viz 1</a>
+  <a href="linechart.html">Viz 2</a>
+  <a href="barchart_phenotypes.html">Viz 3</a>
+  <a href="sankey_cancer.html">Viz 4</a>
+  <a href="scatter_cancer.html" class="active">Viz 5</a>
+</nav>"""
+
+analysis = """
+<div style="padding: 0 24px 40px;">
+  <div class="takeaway">
+    <h3>Analysis</h3>
+    <p>
+      Confirmed cancer-gene associations grew steadily from the late 1980s before surging
+      dramatically in the early 2000s, peaking around 2004-2006. Breast and prostate cancer
+      consistently lead in total confirmed associations across the entire time period, reflecting
+      the sustained research investment in these two cancer types. Lung and colorectal cancer
+      show strong growth through the mid-2000s, while stomach and bladder cancer remain
+      comparatively understudied throughout. The trend lines reveal that all six phenotypes
+      follow a broadly similar upward trajectory, suggesting the boom in associations was a
+      field-wide phenomenon driven by advances in genotyping technology rather than interest
+      in any single cancer type. The clustering of large bubbles between 2003 and 2007
+      underscores how compressed this period of discovery was.
+    </p>
+  </div>
+</div>"""
+
+content = content.replace("</head>\n<body>", nav, 1)
+content = content.replace("</body>", analysis + "\n</body>", 1)
+
+with open("scatter_cancer.html", "w") as f:
+    f.write(content)
+
 print("Saved: scatter_cancer.html")

@@ -2,20 +2,20 @@
 Sankey Diagram: Chromosome → Gene → Cancer Phenotype
 Requires: pip install plotly pandas openpyxl
 
-Run: python sankey_cancer.py
+Run: python Sankey.py
 Outputs: sankey_cancer.html
 """
 
 import pandas as pd
 import plotly.graph_objects as go
 
-# ── Load & filter data ─────────────────────────────────────────────────────────
+# ── Load & filter data ────────────────────────────────────────────────────────
 df = pd.read_excel("cancer_data.xlsx")
 df = df[df["association"] == "Y"].copy()
 
 # Keep top chromosomes / genes / phenotypes to keep diagram readable
-top_chroms   = df["chromosome"].value_counts().head(8).index.tolist()
-top_genes    = df["gene"].value_counts().head(15).index.tolist()
+top_chroms     = df["chromosome"].value_counts().head(8).index.tolist()
+top_genes      = df["gene"].value_counts().head(15).index.tolist()
 top_phenotypes = df["phenotype"].value_counts().head(10).index.tolist()
 
 df = df[
@@ -24,7 +24,7 @@ df = df[
     df["phenotype"].isin(top_phenotypes)
 ]
 
-# ── Aggregate link counts ──────────────────────────────────────────────────────
+# ── Aggregate link counts ─────────────────────────────────────────────────────
 chrom_gene = (
     df.groupby(["chromosome", "gene"]).size().reset_index(name="count")
 )
@@ -34,15 +34,15 @@ gene_pheno = (
     df.groupby(["gene", "phenotype"]).size().reset_index(name="count")
 )
 
-# ── Build node list (order: chromosomes | genes | phenotypes) ──────────────────
-chroms   = sorted(chrom_gene["chromosome"].unique())
-genes    = sorted(gene_pheno["gene"].unique())
+# ── Build node list (order: chromosomes | genes | phenotypes) ─────────────────
+chroms     = sorted(chrom_gene["chromosome"].unique())
+genes      = sorted(gene_pheno["gene"].unique())
 phenotypes = sorted(gene_pheno["phenotype"].unique())
 
 all_nodes = chroms + genes + phenotypes
 node_idx  = {n: i for i, n in enumerate(all_nodes)}
 
-# ── Build source / target / value lists ───────────────────────────────────────
+# ── Build source / target / value lists ──────────────────────────────────────
 sources, targets, values, link_labels = [], [], [], []
 
 for _, row in chrom_gene.iterrows():
@@ -71,11 +71,11 @@ gene_colors = {
     "GSTT1":   "#c8e6c9", "NAT1":    "#dcedc8", "XRCC1":   "#fff9c4",
 }
 pheno_colors = {
-    "breast cancer":    "#e57373", "prostate cancer":  "#7986cb",
-    "lung cancer":      "#4db6ac", "colorectal cancer":"#ffa726",
-    "stomach cancer":   "#a1887f", "bladder cancer":   "#90a4ae",
-    "esophageal cancer":"#f48fb1", "cervical cancer":  "#ce93d8",
-    "endometrial cancer":"#ffe082","melanoma":         "#bcaaa4",
+    "breast cancer":     "#e57373", "prostate cancer":   "#7986cb",
+    "lung cancer":       "#4db6ac", "colorectal cancer": "#ffa726",
+    "stomach cancer":    "#a1887f", "bladder cancer":    "#90a4ae",
+    "esophageal cancer": "#f48fb1", "cervical cancer":   "#ce93d8",
+    "endometrial cancer":"#ffe082", "melanoma":          "#bcaaa4",
 }
 
 node_colors = []
@@ -125,4 +125,49 @@ fig.update_layout(
 )
 
 fig.write_html("sankey_cancer.html")
+
+# ── Inject nav + analysis into the saved HTML ─────────────────────────────────
+with open("sankey_cancer.html", "r") as f:
+    content = f.read()
+
+nav = """<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav>
+  <span class="nav-title">Cancer Genetics Viz</span>
+  <a href="main_page.html">Home</a>
+  <a href="map.html">Viz 1</a>
+  <a href="linechart.html">Viz 2</a>
+  <a href="barchart_phenotypes.html">Viz 3</a>
+  <a href="sankey_cancer.html" class="active">Viz 4</a>
+  <a href="scatter_cancer.html">Viz 5</a>
+</nav>"""
+
+analysis = """
+<div style="padding: 0 24px 40px;">
+  <div class="takeaway">
+    <h3>Analysis</h3>
+    <p>
+      The Sankey diagram reveals how genetic associations flow from chromosomal locations through
+      specific genes into cancer phenotypes. A small number of genes act as broad hubs connecting
+      multiple chromosomes to multiple cancer types - most notably TP53 on chromosome 17, which
+      links to seven distinct phenotypes including lung, breast, bladder, and cervical cancer,
+      reflecting its well-established role as a tumor suppressor across cancer biology.
+      SULT1A1 on chromosome 16 and CYP17A1 on chromosome 10 show similarly wide reach,
+      each connecting to six or more phenotypes. In contrast, BRCA1 flows almost entirely into
+      breast cancer, illustrating a gene with high association count but narrow phenotypic scope.
+      Breast and prostate cancer receive the largest total inflow, consistent with their dominance
+      in the broader dataset, while esophageal and cervical cancer receive relatively thin flows,
+      indicating fewer confirmed genetic associations overall.
+    </p>
+  </div>
+</div>"""
+
+content = content.replace("</head>\n<body>", nav, 1)
+content = content.replace("</body>", analysis + "\n</body>", 1)
+
+with open("sankey_cancer.html", "w") as f:
+    f.write(content)
+
 print("Saved: sankey_cancer.html")

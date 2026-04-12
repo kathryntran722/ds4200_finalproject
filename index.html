@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cancer Genetics — DS4200</title>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <span class="nav-title">Cancer Genetics Viz</span>
+  <a href="main_page.html" class="active">Home</a>
+  <a href="map.html">Viz 1</a>
+  <a href="linechart.html">Viz 2</a>
+  <a href="barchart_phenotypes.html">Viz 3</a>
+  <a href="sankey_cancer.html">Viz 4</a>
+  <a href="scatter_cancer.html">Viz 5</a>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <h1>Exploring Cancer–Gene Associations</h1>
+    <p>An interactive data visualization project using the Genetic Association Database (GAD)
+       to uncover patterns in how genes, chromosomes, and cancer types have been studied worldwide.</p>
+  </div>
+
+  <!-- MOTIVATION -->
+  <h2>Motivation</h2>
+  <p>
+  Cancer is one of the leading causes of death worldwide, yet the genetic mechanisms
+  underlying different cancer types remain incompletely understood. Genome-wide and
+  candidate-gene association studies have produced thousands of findings linking specific
+  gene variants to cancer risk, but these results are scattered across hundreds of
+  publications, making it difficult to see the bigger picture.
+</p>
+<p>
+  This project asks: <em>which genes and chromosomes are most consistently linked to cancer,
+  which cancer types have attracted the most genetic research, and how has that research
+  evolved over time and across the globe?</em> By visualizing confirmed associations from the
+  Genetic Association Database, we can surface patterns that are impossible to see by reading
+  individual papers, revealing both the depth of evidence for well-studied cancers like
+  breast and prostate cancer, and the relative gaps for cancers like bladder or esophageal cancer.
+</p>
+
+  <!-- DATA INTRODUCTION -->
+  <h2>About the Data</h2>
+  <p>
+    This project uses the <strong>Genetic Association Database (GAD)</strong>, a curated
+    archive of published human genetic association studies. We focus specifically on the
+    cancer subset of this database.
+  </p>
+
+  <div class="finding">
+    <h3>Dataset size</h3>
+    <p>The dataset contains approximately <strong>5,000+ records</strong>, each representing
+       one published study. Studies span from 1999 to 2006 and cover hundreds of genes
+       across all 23 human chromosomes.</p>
+  </div>
+
+  <div class="finding">
+    <h3>Key attributes</h3>
+    <p>Each record includes the following fields:</p>
+    <ul style="margin-top:8px; padding-left:20px; font-size:15px; color:#555; line-height:2;">
+      <li><strong>gene</strong> — the gene variant being studied (e.g. ABCB1, BRCA1)</li>
+      <li><strong>phenotype</strong> — the cancer type being investigated (e.g. breast cancer, leukemia)</li>
+      <li><strong>association</strong> — whether the study found a significant link: Y (yes), N (no), or blank (not coded)</li>
+      <li><strong>chromosome / chromosome_band</strong> — the genomic location of the gene</li>
+      <li><strong>year</strong> — the publication year of the study</li>
+      <li><strong>population / continent</strong> — the geographic or ethnic group studied</li>
+      <li><strong>reference / pubmed_id</strong> — the source publication</li>
+    </ul>
+  </div>
+
+  <div class="finding">
+    <h3>Important note on the association field</h3>
+    <p>
+      The majority of entries have a <em>blank</em> association value — this does not mean
+      no association was found. It means the GAD curators did not code that entry. Only
+      entries explicitly marked Y or N should be interpreted as confirmed or denied associations.
+    </p>
+  </div>
+
+  <!-- VISUALIZATIONS -->
+  <h2>Visualizations</h2>
+  <div class="viz-grid">
+
+    <a class="viz-card" href="map.html">
+      <div class="viz-number">Viz 01</div>
+      <h3>Cancer-Gene studies map</h3>
+      <p>Where in the world are cancer-gene studies being conducted?</p>
+      <span class="tag d3">D3</span>
+    </a>
+
+    <a class="viz-card" href="linechart.html">
+      <div class="viz-number">Viz 02</div>
+      <h3>Cancer–Gene Association Studies Over Time</h3>
+      <p>What genes were studied the most year after year?</p>
+      <span class="tag d3">D3</span>
+    </a>
+
+     <a class="viz-card" href="barchart_phenotypes.html">
+      <div class="viz-number">Viz 03</div>
+      <h3>Top 5 Phenotypes</h3>
+      <p>How has cancer research grown year by year, and which phenotypes drove each era?</p>
+      <span class="tag altair">Altair</span>
+    </a>
+
+    <a class="viz-card" href="sankey_cancer.html">
+      <div class="viz-number">Viz 04</div>
+      <h3>Chromosome → gene → cancer Sankey</h3>
+      <p>How do chromosomes, genes, and cancer types flow into one another?</p>
+    </a>
+
+    <a class="viz-card" href="scatter_cancer.html">
+      <div class="viz-number">Viz 05</div>
+      <h3>Genetic Association Over Time</h3>
+      <p>How has genetic associations evolved over the years by cancer type?</p>
+    </a>
+
+
+
+  </div>
+
+   <!-- SUMMARY -->
+  <h2 id="summary">Summary</h2>
+  <p>
+    Across five visualizations, this project surfaces several patterns in how cancer gene
+    association research has evolved over time and across the globe. We found that cancer gene association 
+    research is heavily concentrated in a small number of cancer types, with breast, prostate, and colorectal cancer
+    receiving the vast majority of research attention while cancers like stomach and bladder 
+    remain understudied. We also learned that a surge in published studies following the 
+    completion of the Human Genome Project in 2003 drove most of the genetic discoveries in this
+    dataset, with a core set of genes with particularly TP53, GSTM1, and CYP1A1 appearing 
+    repeatedly across multiple cancer types and phenotypes. Most strikingly, our geographic map
+    revealed that Africa and South America are severely underrepresented in the data, meaning 
+    the genetic associations identified here may not apply equally to all human populations.
+    
+    In the future, expanding genetic research to include more diverse and underrepresented populations
+    would be a critical next step toward making these findings more globally applicable. Additionally,
+    directing more research attention toward understudied cancer types and exploring newer genomic
+    datasets beyond 2007 would provide a more complete and equitable picture of the genetic basis
+    of cancer.
+
+  </p>
+
+  <!-- REFERENCES -->
+  <h2>References</h2>
+  <ul class="references">
+    <li>
+      Becker KG et al. (2004). The genetic association database.
+      <a href="https://www.nature.com/articles/ng1414" target="_blank">Nature Genetics, 36, 431–432</a>
+    </li>
+    <li>
+      GAD Dataset source:
+      <a href="https://geneticassociationdb.nih.gov/" target="_blank">geneticassociationdb.nih.gov</a>
+    </li>
+  </ul>
+
+</div>
+
+<footer>DS4200 — Information Presentation &amp; Visualization &nbsp;|&nbsp; Northeastern University</footer>
+
+</body>
+</html>

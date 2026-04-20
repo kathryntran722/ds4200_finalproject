@@ -8,8 +8,8 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://unpkg.com/topojson-client@3/dist/topojson-client.min.js"></script>
   <style>
-    .country { stroke: #fff; stroke-width: 0.4; transition: opacity 0.2s; cursor: pointer; }
-    .country:hover { opacity: 0.75; }
+    .continent { stroke: #fff; stroke-width: 0.5; transition: opacity 0.2s; cursor: pointer; }
+    .continent:hover { opacity: 0.75; }
     .legend-label { font-size: 11px; fill: #666; }
   </style>
 </head>
@@ -127,19 +127,53 @@ Promise.all([
 
   const countries = topojson.feature(world, world.objects.countries);
 
+  // Group country features by continent
+  const continentGroups = {};
+  countries.features.forEach(f => {
+    const key = C[+f.id];
+    if (!key) return;
+    if (!continentGroups[key]) continentGroups[key] = [];
+    continentGroups[key].push(f);
+  });
+
+  // Also collect unassigned countries for the gray background
+  const unassigned = countries.features.filter(f => !C[+f.id]);
+
+  // Draw unassigned countries as gray background (no borders between them)
+  if (unassigned.length) {
+    const mergedUnassigned = topojson.merge(world, world.objects.countries.geometries.filter(g => !C[+g.id]));
+    svg.append('path')
+      .datum(mergedUnassigned)
+      .attr('d', path)
+      .attr('fill', '#e8e8e8')
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 0.5);
+  }
+
+  // Draw each continent as a single merged shape (no internal country borders)
+  const continentKeys = Object.keys(continentGroups);
+  const continentFeatures = continentKeys.map(key => {
+    const geoms = world.objects.countries.geometries.filter(g => C[+g.id] === key);
+    return {
+      type: 'Feature',
+      geometry: topojson.merge(world, geoms),
+      properties: { continent: key }
+    };
+  });
+
   svg.append('g')
-    .selectAll('.country')
-    .data(countries.features)
+    .selectAll('.continent')
+    .data(continentFeatures)
     .join('path')
-    .attr('class', 'country')
+    .attr('class', 'continent')
     .attr('d', path)
     .attr('fill', d => {
-      const key = C[+d.id];
-      return key && studiesByKey[key] ? colorScale(studiesByKey[key]) : '#e8e8e8';
+      const key = d.properties.continent;
+      return studiesByKey[key] ? colorScale(studiesByKey[key]) : '#e8e8e8';
     })
     .on('mousemove', function(event, d) {
-      const key = C[+d.id];
-      if (!key || !studiesByKey[key]) {
+      const key = d.properties.continent;
+      if (!studiesByKey[key]) {
         tooltip.style('opacity', 1)
           .style('left', (event.pageX + 14) + 'px')
           .style('top', (event.pageY - 32) + 'px')

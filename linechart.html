@@ -56,19 +56,20 @@
   <div class="viz-page-header">
     <span class="tag d3">D3</span>
     <h1>Cancer–gene association studies over time</h1>
-    <p>Brush on the top chart to see the top 5 gene breakdown below.
+    <p>Brush on the upper chart to see the top 5 gene breakdown below.
       <button class="reset-btn" id="reset">Reset</button>
     </p>
   </div>
 
   <div class="viz-container" style="text-align:center;">
-    <svg id="svg-left"></svg>
+    <svg id="svg-upper"></svg>
   </div>
 
+  <div id="hint">↓ Drag on the chart above to filter the top 5 genes below</div>
+
   <div class="viz-container" style="text-align:center;">
-    <svg id="svg-right"></svg>
+    <svg id="svg-lower"></svg>
     <div id="legend"></div>
-    <div id="hint">↑ Drag on the chart above to see gene breakdown</div>
   </div>
   <div id="tooltip"></div>
 
@@ -117,64 +118,64 @@ Promise.all([
   let activeGenes = new Set();
 
   // =====================
-  // LEFT CHART — total trend
+  // UPPER CHART — total trend
   // =====================
-  const svgL = d3.select('#svg-left').attr('width', W).attr('height', H);
+  const svgU = d3.select('#svg-upper').attr('width', W).attr('height', H);
 
-  const xL = d3.scaleTime().domain(fullDomain).range([M.left, W - M.right]);
-  const yL = d3.scaleLinear()
+  const xU = d3.scaleTime().domain(fullDomain).range([M.left, W - M.right]);
+  const yU = d3.scaleLinear()
     .domain([0, d3.max(totalData, d => d.count) * 1.1]).nice()
     .range([H - M.bottom, M.top]);
 
-  svgL.append('defs').append('clipPath').attr('id', 'clip-left')
+  svgU.append('defs').append('clipPath').attr('id', 'clip-upper')
     .append('rect').attr('x', M.left).attr('y', M.top)
     .attr('width', W - M.left - M.right).attr('height', H - M.top - M.bottom);
 
-  const leftG = svgL.append('g').attr('clip-path', 'url(#clip-left)');
+  const upperG = svgU.append('g').attr('clip-path', 'url(#clip-upper)');
 
-  leftG.append('path').datum(totalData)
+  upperG.append('path').datum(totalData)
     .attr('class', 'area-total')
-    .attr('d', d3.area().x(d => xL(d.year)).y0(yL(0)).y1(d => yL(d.count)));
+    .attr('d', d3.area().x(d => xU(d.year)).y0(yU(0)).y1(d => yU(d.count)));
 
-  leftG.append('path').datum(totalData)
+  upperG.append('path').datum(totalData)
     .attr('class', 'line-total')
-    .attr('d', d3.line().x(d => xL(d.year)).y(d => yL(d.count)));
+    .attr('d', d3.line().x(d => xU(d.year)).y(d => yU(d.count)));
 
-  svgL.append('g').attr('class', 'axis')
+  svgU.append('g').attr('class', 'axis')
     .attr('transform', `translate(0,${H - M.bottom})`)
-    .call(d3.axisBottom(xL).ticks(6).tickFormat(d3.timeFormat('%Y')));
+    .call(d3.axisBottom(xU).ticks(6).tickFormat(d3.timeFormat('%Y')));
 
-  svgL.append('g').attr('class', 'axis')
+  svgU.append('g').attr('class', 'axis')
     .attr('transform', `translate(${M.left},0)`)
-    .call(d3.axisLeft(yL).ticks(6));
+    .call(d3.axisLeft(yU).ticks(6));
 
-  svgL.append('text').attr('transform', 'rotate(-90)')
+  svgU.append('text').attr('transform', 'rotate(-90)')
     .attr('x', -(H / 2)).attr('y', 14).attr('text-anchor', 'middle')
     .attr('font-size', 12).attr('fill', '#888').text('Number of studies');
 
-  svgL.append('text').attr('class', 'chart-title')
+  svgU.append('text').attr('class', 'chart-title')
     .attr('x', M.left).attr('y', 18).text('Overall study trend');
-  svgL.append('text').attr('class', 'chart-sub')
+  svgU.append('text').attr('class', 'chart-sub')
     .attr('x', M.left).attr('y', 34).text('All genes combined');
 
   // Hover tooltip
   const tooltip = d3.select('#tooltip');
   const bisect = d3.bisector(d => d.year).left;
-  const dot = svgL.append('circle').attr('class', 'hover-dot').attr('r', 5).attr('fill', '#7F77DD');
+  const dot = svgU.append('circle').attr('class', 'hover-dot').attr('r', 5).attr('fill', '#7F77DD');
 
-  svgL.append('rect')
+  svgU.append('rect')
     .attr('x', M.left).attr('y', M.top)
     .attr('width', W - M.left - M.right).attr('height', H - M.top - M.bottom)
     .attr('fill', 'transparent').style('pointer-events', 'none');
 
-  svgL.on('mousemove', function(event) {
-    const [mx] = d3.pointer(event, svgL.node());
+  svgU.on('mousemove', function(event) {
+    const [mx] = d3.pointer(event, svgU.node());
     if (mx < M.left || mx > W - M.right) return;
-    const x0 = xL.invert(mx);
+    const x0 = xU.invert(mx);
     const i = bisect(totalData, x0, 1);
     if (i >= totalData.length) return;
     const d = totalData[i];
-    dot.attr('cx', xL(d.year)).attr('cy', yL(d.count)).style('opacity', 1);
+    dot.attr('cx', xU(d.year)).attr('cy', yU(d.count)).style('opacity', 1);
     tooltip.style('opacity', 1)
       .style('left', (event.pageX + 14) + 'px')
       .style('top', (event.pageY - 32) + 'px')
@@ -184,59 +185,59 @@ Promise.all([
     tooltip.style('opacity', 0);
   });
 
-  // Brush
+  // Brush on upper chart
   const brush = d3.brushX()
     .extent([[M.left, M.top], [W - M.right, H - M.bottom]])
     .on('brush end', brushed);
 
-  svgL.append('g').attr('class', 'brush').call(brush);
+  svgU.append('g').attr('class', 'brush').call(brush);
 
   // =====================
-  // RIGHT CHART — gene breakdown
+  // LOWER CHART — gene breakdown
   // =====================
-  const svgR = d3.select('#svg-right').attr('width', W).attr('height', H);
+  const svgLow = d3.select('#svg-lower').attr('width', W).attr('height', H);
 
-  const xR = d3.scaleTime().domain(fullDomain).range([M.left, W - M.right]);
-  const yR = d3.scaleLinear()
+  const xLow = d3.scaleTime().domain(fullDomain).range([M.left, W - M.right]);
+  const yLow = d3.scaleLinear()
     .domain([0, d3.max(geneData, d => d.count) * 1.1]).nice()
     .range([H - M.bottom, M.top]);
 
-  svgR.append('defs').append('clipPath').attr('id', 'clip-right')
+  svgLow.append('defs').append('clipPath').attr('id', 'clip-lower')
     .append('rect').attr('x', M.left).attr('y', M.top)
     .attr('width', W - M.left - M.right).attr('height', H - M.top - M.bottom);
 
-  const rightG = svgR.append('g').attr('clip-path', 'url(#clip-right)');
+  const lowerG = svgLow.append('g').attr('clip-path', 'url(#clip-lower)');
 
-  const placeholder = svgR.append('text')
+  const placeholder = svgLow.append('text')
     .attr('x', W / 2).attr('y', H / 2)
     .attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', '#bbb')
-    .text('Brush the left chart to see gene breakdown');
+    .text('Brush the chart above to see gene breakdown');
 
-  const xAxisR = svgR.append('g').attr('class', 'axis')
+  const xAxisLow = svgLow.append('g').attr('class', 'axis')
     .attr('transform', `translate(0,${H - M.bottom})`)
-    .call(d3.axisBottom(xR).ticks(6).tickFormat(d3.timeFormat('%Y')));
+    .call(d3.axisBottom(xLow).ticks(6).tickFormat(d3.timeFormat('%Y')));
 
-svgR.append('g').attr('class', 'axis y-axis-right')
+  svgLow.append('g').attr('class', 'axis y-axis-lower')
     .attr('transform', `translate(${M.left},0)`)
-    .call(d3.axisLeft(yR).ticks(6));
+    .call(d3.axisLeft(yLow).ticks(6));
 
-  svgR.append('text').attr('transform', 'rotate(-90)')
+  svgLow.append('text').attr('transform', 'rotate(-90)')
     .attr('x', -(H / 2)).attr('y', 14).attr('text-anchor', 'middle')
     .attr('font-size', 12).attr('fill', '#888').text('Number of studies');
 
-  svgR.append('text').attr('class', 'chart-title')
+  svgLow.append('text').attr('class', 'chart-title')
     .attr('x', M.left).attr('y', 18).text('Top 5 genes in selected range');
-  const rightSub = svgR.append('text').attr('class', 'chart-sub')
-    .attr('x', M.left).attr('y', 34).text('Select a range on the left');
+  const lowerSub = svgLow.append('text').attr('class', 'chart-sub')
+    .attr('x', M.left).attr('y', 34).text('Select a range above');
 
   // =====================
-  // BRUSH HANDLER
+  // BRUSH HANDLER — filters upper selection into lower chart
   // =====================
   function brushed(event) {
     if (!event.selection) return;
-    const [x0, x1] = event.selection.map(xL.invert);
+    const [x0, x1] = event.selection.map(xU.invert);
 
-    // Find top 5 genes in range
+    // Find top 5 genes in brushed range
     const inRange = geneData.filter(d => d.year >= new Date(x0.getFullYear(), 0, 1) && d.year <= new Date(x1.getFullYear(), 11, 31));
     const totals = d3.rollup(inRange, v => d3.sum(v, d => d.count), d => d.gene);
     const top5 = [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(d => d[0]);
@@ -250,42 +251,44 @@ svgR.append('g').attr('class', 'axis y-axis-right')
         .sort((a, b) => a.year - b.year)
     }));
 
-    xR.domain([new Date(x0.getFullYear(), 0, 1), new Date(x1.getFullYear(), 11, 31)]);
+    // Update lower chart axes to match brushed range
+    xLow.domain([new Date(x0.getFullYear(), 0, 1), new Date(x1.getFullYear(), 11, 31)]);
     const yearSpan = x1.getFullYear() - x0.getFullYear();
-    xAxisR.call(d3.axisBottom(xR)
+    xAxisLow.call(d3.axisBottom(xLow)
       .ticks(Math.min(yearSpan + 1, 10))
       .tickFormat(d3.timeFormat('%Y')));
 
     const visibleMax = d3.max(geneGroups, g => d3.max(g.values, d => d.count)) || 1;
-    yR.domain([0, visibleMax * 1.2]).nice();
-    svgR.select('.y-axis-right').call(d3.axisLeft(yR).ticks(6));
+    yLow.domain([0, visibleMax * 1.2]).nice();
+    svgLow.select('.y-axis-lower').call(d3.axisLeft(yLow).ticks(6));
 
+    // Draw gene lines on lower chart
     const geneLine = d3.line()
-      .x(d => xR(d.year)).y(d => yR(d.count));
+      .x(d => xLow(d.year)).y(d => yLow(d.count));
 
-    rightG.selectAll('.gene-line').remove();
-    rightG.selectAll('.gene-line')
+    lowerG.selectAll('.gene-line').remove();
+    lowerG.selectAll('.gene-line')
       .data(geneGroups).join('path')
       .attr('class', 'gene-line')
       .attr('stroke', d => color(d.gene))
       .attr('d', d => geneLine(d.values));
 
     placeholder.style('display', 'none');
-    rightSub.text(`${x0.getFullYear()}–${x1.getFullYear()}`);
+    lowerSub.text(`${x0.getFullYear()}–${x1.getFullYear()}`);
     d3.select('#hint').style('opacity', 0);
     buildLegend(top5);
   }
 
   // =====================
-  // RESET
+  // RESET — clears brush and restores lower chart
   // =====================
   function resetAll() {
-    svgL.select('.brush').call(brush.move, null);
-    xR.domain(fullDomain);
-    xAxisR.call(d3.axisBottom(xR).ticks(6).tickFormat(d3.timeFormat('%Y')));
-    rightG.selectAll('.gene-line').remove();
+    svgU.select('.brush').call(brush.move, null);
+    xLow.domain(fullDomain);
+    xAxisLow.call(d3.axisBottom(xLow).ticks(6).tickFormat(d3.timeFormat('%Y')));
+    lowerG.selectAll('.gene-line').remove();
     placeholder.style('display', null);
-    rightSub.text('Select a range on the left');
+    lowerSub.text('Select a range above');
     d3.select('#hint').style('opacity', 1);
     d3.select('#legend').selectAll('*').remove();
   }
@@ -293,7 +296,7 @@ svgR.append('g').attr('class', 'axis y-axis-right')
   d3.select('#reset').on('click', resetAll);
 
   // =====================
-  // LEGEND
+  // LEGEND — clickable gene filter for lower chart
   // =====================
   function buildLegend(top5) {
     const legend = d3.select('#legend');
@@ -303,7 +306,7 @@ svgR.append('g').attr('class', 'axis y-axis-right')
         .on('click', () => {
           const onlyThis = activeGenes.size === 1 && activeGenes.has(g);
           activeGenes = onlyThis ? new Set(top5) : new Set([g]);
-          rightG.selectAll('.gene-line')
+          lowerG.selectAll('.gene-line')
             .classed('faded', d => !activeGenes.has(d.gene))
             .attr('stroke-width', d => activeGenes.size === 1 && activeGenes.has(d.gene) ? 3.5 : 2);
           legend.selectAll('.legend-item')

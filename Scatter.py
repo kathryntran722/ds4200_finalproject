@@ -9,41 +9,38 @@ Outputs: scatter_cancer.html
 import pandas as pd
 import altair as alt
 
-# ── Load & filter data ────────────────────────────────────────────────────────
+#  Load & filter data 
 df = pd.read_excel("cancer_data.xlsx")
 df = df[df["association"] == "Y"].dropna(subset=["year"]).copy()
 df["year"] = df["year"].astype(int)
 
-# Keep top 6 phenotypes
-top_phenotypes = df["phenotype"].value_counts().head(6).index.tolist()
-df = df[df["phenotype"].isin(top_phenotypes)]
-
-# Aggregate: count confirmed associations per (year, phenotype)
+# All phenotypes with at least 3 data points across years
 agg = (
     df.groupby(["year", "phenotype"])
     .size()
     .reset_index(name="associations")
 )
 
-# ── Colour scale ──────────────────────────────────────────────────────────────
-color_scale = alt.Scale(
-    domain=[
-        "breast cancer", "prostate cancer", "lung cancer",
-        "colorectal cancer", "stomach cancer", "bladder cancer",
-    ],
-    range=[
-        "#e57373", "#7986cb", "#4db6ac",
-        "#ffa726", "#a1887f", "#90a4ae",
-    ],
+# Keep phenotypes that appear in at least 5 years so trend lines are meaningful
+valid_phenotypes = (
+    agg.groupby("phenotype")["year"].count()
+    .loc[lambda x: x >= 5]
+    .index.tolist()
 )
+agg = agg[agg["phenotype"].isin(valid_phenotypes)]
 
-# ── Selection ─────────────────────────────────────────────────────────────────
+#  Colour scale 
+phenotypes = sorted(agg["phenotype"].unique().tolist())
+# Use a categorical color scheme
+color_scale = alt.Scale(scheme="tableau20")
+
+#  Selection 
 phenotype_selection = alt.selection_point(fields=["phenotype"], bind="legend")
 
-# ── Scatter layer ─────────────────────────────────────────────────────────────
+#  Scatter layer — fixed dot size, no size encoding 
 scatter = (
     alt.Chart(agg)
-    .mark_circle(stroke="#0d1117", strokeWidth=0.5)
+    .mark_circle(size=80, stroke="#0d1117", strokeWidth=0.5)
     .encode(
         x=alt.X(
             "year:Q",
@@ -58,12 +55,6 @@ scatter = (
             axis=alt.Axis(grid=True, gridColor="#1a2535", tickColor="#1a2535",
                           labelColor="#7a8899", titleColor="#7a8899"),
         ),
-        size=alt.Size(
-            "associations:Q",
-            title="Associations",
-            scale=alt.Scale(range=[30, 800]),
-            legend=None,
-        ),
         color=alt.Color(
             "phenotype:N",
             title="Cancer Phenotype",
@@ -76,7 +67,7 @@ scatter = (
                 symbolType="circle",
             ),
         ),
-        opacity=alt.condition(phenotype_selection, alt.value(0.82), alt.value(0.12)),
+        opacity=alt.condition(phenotype_selection, alt.value(0.85), alt.value(0.08)),
         tooltip=[
             alt.Tooltip("phenotype:N", title="Phenotype"),
             alt.Tooltip("year:Q", title="Year"),
@@ -86,11 +77,16 @@ scatter = (
     .add_params(phenotype_selection)
 )
 
-# ── Trend line ────────────────────────────────────────────────────────────────
+#  Polynomial trend line (order=3 captures exponential-like growth) 
 trend = (
     alt.Chart(agg)
     .transform_filter(phenotype_selection)
-    .transform_regression("year", "associations", groupby=["phenotype"], method="linear")
+    .transform_regression(
+        "year", "associations",
+        groupby=["phenotype"],
+        method="poly",
+        order=3
+    )
     .mark_line(strokeDash=[6, 4], strokeWidth=1.8, opacity=0.6)
     .encode(
         x="year:Q",
@@ -99,13 +95,13 @@ trend = (
     )
 )
 
-# ── Combine & style ───────────────────────────────────────────────────────────
+#  Combine & style 
 chart = (
     (scatter + trend)
     .properties(
         title=alt.TitleParams(
             text="Genetic Associations Over Time by Cancer Phenotype",
-            subtitle="Confirmed gene-cancer associations (Y) · Click legend to filter · Bubble size = association count · Dashed Lines = Line of Best Fit",
+            subtitle="Confirmed gene-cancer associations (Y) · Click legend to filter · Dashed lines = polynomial trend",
             color="#f0e9d6",
             subtitleColor="#7a8899",
             fontSize=18,
@@ -114,7 +110,7 @@ chart = (
             font="Georgia, serif",
         ),
         width=760,
-        height=420,
+        height=460,
         background="#0d1117",
     )
     .configure_view(strokeWidth=0)
@@ -131,7 +127,7 @@ chart = (
 
 chart.save("scatter_cancer.html")
 
-# ── Inject nav + analysis into the saved HTML ─────────────────────────────────
+#  Inject nav + analysis into the saved HTML 
 with open("scatter_cancer.html", "r") as f:
     content = f.read()
 
@@ -159,11 +155,9 @@ analysis = """
       consistently lead in total confirmed associations across the entire time period, reflecting
       the sustained research investment in these two cancer types. Lung and colorectal cancer
       show strong growth through the mid-2000s, while stomach and bladder cancer remain
-      comparatively understudied throughout. The trend lines reveal that all six phenotypes
-      follow a broadly similar upward trajectory, suggesting the boom in associations was a
-      field-wide phenomenon driven by advances in genotyping technology rather than interest
-      in any single cancer type. The clustering of large bubbles between 2003 and 2007
-      underscores how compressed this period of discovery was.
+      comparatively understudied throughout. The polynomial trend lines better capture the
+      exponential-like growth in associations over time compared to a linear fit. Click any
+      phenotype in the legend to isolate its trend.
     </p>
   </div>
 </div>"""

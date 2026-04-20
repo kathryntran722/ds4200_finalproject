@@ -8,15 +8,8 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://unpkg.com/topojson-client@3/dist/topojson-client.min.js"></script>
   <style>
-    h2   { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
-    p.sub { font-size: 13px; color: #666; margin-bottom: 20px; }
     .country { stroke: #fff; stroke-width: 0.4; transition: opacity 0.2s; cursor: pointer; }
     .country:hover { opacity: 0.75; }
-    #tooltip {
-      position: absolute; background: rgba(0,0,0,0.75); color: #fff;
-      padding: 8px 12px; border-radius: 6px; font-size: 12px;
-      pointer-events: none; opacity: 0; transition: opacity 0.15s; line-height: 1.6;
-    }
     .legend-label { font-size: 11px; fill: #666; }
   </style>
 </head>
@@ -24,7 +17,7 @@
 
 <nav>
   <span class="nav-title">Cancer Genetics Viz</span>
-  <a href="main_page.html">Home</a>
+  <a href="index.html">Home</a>
   <a href="map.html" class="active">Viz 1</a>
   <a href="linechart.html">Viz 2</a>
   <a href="barchart_phenotypes.html">Viz 3</a>
@@ -32,17 +25,19 @@
   <a href="scatter_cancer.html">Viz 5</a>
 </nav>
 
-<div style="padding: 24px 24px 0;">
-  <h2>Cancer–gene association studies by continent</h2>
-  <p class="sub">Hover over a continent to see the number of studies conducted there.</p>
-</div>
+<div class="page">
+  <div class="viz-page-header">
+    <span class="tag d3">D3</span>
+    <h1>Cancer–gene association studies by continent</h1>
+    <p>Hover over a continent to see the number of studies conducted there.</p>
+  </div>
 
-<div style="display: flex; align-items: flex-start; gap: 32px; padding: 0 24px 40px;">
-  <div style="flex-shrink: 0;">
+  <div class="viz-container" style="text-align:center;">
     <svg id="map"></svg>
   </div>
   <div id="tooltip"></div>
-  <div class="takeaway" style="margin-top: 0; align-self: center;">
+
+  <div class="takeaway">
     <h3>Analysis</h3>
     <p>
       Asia dominates cancer–gene association research, contributing the most studies by a wide margin
@@ -58,7 +53,7 @@
 </div>
 
 <script>
-const W = 1000, H = 700;
+const W = 900, H = 460;
 
 const C = {
   12:'Africa',24:'Africa',72:'Africa',108:'Africa',120:'Africa',132:'Africa',140:'Africa',
@@ -111,7 +106,7 @@ const DISPLAY = {
 
 const svg = d3.select('#map').attr('width', W).attr('height', H);
 const tooltip = d3.select('#tooltip');
-const projection = d3.geoNaturalEarth1().scale(145).translate([W / 2, H / 2]);
+const projection = d3.geoNaturalEarth1().scale(170).translate([W / 2, H / 2]);
 const path = d3.geoPath().projection(projection);
 
 Promise.all([
@@ -128,7 +123,7 @@ Promise.all([
   });
 
   const maxVal = d3.max(Object.values(studiesByKey));
-  const colorScale = d3.scaleSequential().domain([0, maxVal]).interpolator(d3.interpolateBlues);
+  const colorScale = d3.scaleSequential().domain([0, maxVal]).interpolator(d3.interpolatePurples);
 
   const countries = topojson.feature(world, world.objects.countries);
 

@@ -29,7 +29,7 @@ agg = (
 color_scale = alt.Scale(
     domain=["breast cancer", "prostate cancer", "lung cancer",
             "colorectal cancer", "stomach cancer", "bladder cancer"],
-    range=["#e57373", "#7986cb", "#4db6ac", "#ffa726", "#a1887f", "#90a4ae"],
+    range=["#D85A76", "#7F77DD", "#1D9E75", "#D4852E", "#5B9BD5", "#A67BBF"],
 )
 
 # Selection for legend filtering
@@ -135,16 +135,24 @@ nav = """<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@
 <body>
 <nav>
   <span class="nav-title">Cancer Genetics Viz</span>
-  <a href="main_page.html">Home</a>
+  <a href="index.html">Home</a>
   <a href="map.html">Viz 1</a>
   <a href="linechart.html">Viz 2</a>
   <a href="barchart_phenotypes.html">Viz 3</a>
   <a href="sankey_cancer.html">Viz 4</a>
   <a href="scatter_cancer.html" class="active">Viz 5</a>
-</nav>"""
+</nav>
+<div class="page">
+  <div class="viz-page-header">
+    <span class="tag altair">Altair</span>
+    <h1>Genetic Associations Over Time</h1>
+    <p>How have confirmed genetic associations evolved over the years by cancer type?</p>
+  </div>
+  <div class="viz-container">"""
 
 analysis = """
-<div style="padding: 0 24px 40px;">
+  </div><!-- /.viz-container -->
+
   <div class="takeaway">
     <h3>Analysis</h3>
     <p>
@@ -158,7 +166,8 @@ analysis = """
       phenotype in the legend to isolate its trend.
     </p>
   </div>
-</div>"""
+</div><!-- /.page -->
+"""
 
 content = content.replace("</head>\n<body>", nav, 1)
 content = content.replace("</body>", analysis + "\n</body>", 1)

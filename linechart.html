@@ -7,9 +7,6 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
-    h2   { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
-    p.sub { font-size: 13px; color: #666; margin-bottom: 20px; }
-
     .axis path, .axis line { stroke: #ddd; }
     .axis text { font-size: 12px; fill: #666; }
     .chart-title { font-size: 14px; font-weight: 500; fill: #333; }
@@ -25,15 +22,11 @@
       stroke: #7F77DD; stroke-width: 1px;
     }
 
-    #tooltip {
-      position: absolute; background: rgba(0,0,0,0.75); color: #fff;
-      padding: 6px 10px; border-radius: 6px; font-size: 12px;
-      pointer-events: none; opacity: 0; transition: opacity 0.15s;
-    }
     .hover-dot { stroke: #fff; stroke-width: 2; opacity: 0; pointer-events: none; }
 
     #legend {
       display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px;
+      justify-content: center;
     }
     .legend-item {
       display: flex; align-items: center; gap: 6px; font-size: 12px;
@@ -44,12 +37,6 @@
     .legend-item.faded { opacity: 0.35; }
     .legend-swatch { width: 24px; height: 3px; border-radius: 2px; }
 
-    .reset-btn {
-      font-size: 12px; padding: 3px 10px; cursor: pointer;
-      border: 1px solid #ccc; border-radius: 4px;
-      background: #fff; color: #444; margin-left: 12px;
-    }
-    .reset-btn:hover { background: #f5f5f5; }
     #hint { font-size: 12px; color: #7F77DD; margin-top: 8px; min-height: 18px; }
   </style>
 </head>
@@ -57,7 +44,7 @@
 
 <nav>
   <span class="nav-title">Cancer Genetics Viz</span>
-  <a href="main_page.html">Home</a>
+  <a href="index.html">Home</a>
   <a href="map.html">Viz 1</a>
   <a href="linechart.html" class="active">Viz 2</a>
   <a href="barchart_phenotypes.html">Viz 3</a>
@@ -65,23 +52,26 @@
   <a href="scatter_cancer.html">Viz 5</a>
 </nav>
 
-<h2>Cancer–gene association studies over time</h2>
-<p class="sub">
-  Brush on the left chart to see the top 5 gene breakdown on the right.
-  <button class="reset-btn" id="reset">Reset</button>
-</p>
+<div class="page">
+  <div class="viz-page-header">
+    <span class="tag d3">D3</span>
+    <h1>Cancer–gene association studies over time</h1>
+    <p>Brush on the top chart to see the top 5 gene breakdown below.
+      <button class="reset-btn" id="reset">Reset</button>
+    </p>
+  </div>
 
-<div style="display:flex; gap:40px; align-items:flex-start;">
-  <div><svg id="svg-left"></svg></div>
-  <div>
+  <div class="viz-container" style="text-align:center;">
+    <svg id="svg-left"></svg>
+  </div>
+
+  <div class="viz-container" style="text-align:center;">
     <svg id="svg-right"></svg>
     <div id="legend"></div>
-    <div id="hint">← Drag on the left chart to see gene breakdown</div>
+    <div id="hint">↑ Drag on the chart above to see gene breakdown</div>
   </div>
-</div>
-<div id="tooltip"></div>
+  <div id="tooltip"></div>
 
-<div style="padding: 0 24px 40px;">
   <div class="takeaway">
     <h3>Analysis</h3>
     <p>
@@ -108,12 +98,11 @@
     </p>
   </div>
 </div>
-<div id="tooltip"></div>
 
 <script>
-const W = 700, H = 700;
-const M = { top: 50, right: 20, bottom: 40, left: 55 };
-const COLORS = ['#7F77DD', '#1D9E75', '#D85A30', '#D4537E', '#BA7517'];
+const W = 900, H = 360;
+const M = { top: 50, right: 30, bottom: 40, left: 55 };
+const COLORS = ['#7F77DD', '#1D9E75', '#D85A76', '#D4852E', '#5B9BD5'];
 
 Promise.all([
   d3.json('timeline_data.json'),

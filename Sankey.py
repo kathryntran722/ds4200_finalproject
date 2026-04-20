@@ -62,11 +62,11 @@ for _, row in gene_pheno.iterrows():
 node_colors = []
 for n in all_nodes:
     if n in chroms:
-        node_colors.append("#4fc3f7")
+        node_colors.append("#5B9BD5")   # blue — chromosomes
     elif n in genes:
-        node_colors.append("#4db6ac")
+        node_colors.append("#1D9E75")   # teal — genes
     else:
-        node_colors.append("#e57373")
+        node_colors.append("#D85A76")   # rose — phenotypes
 
 # Build figure
 fig = go.Figure(go.Sankey(
@@ -115,16 +115,24 @@ nav = """<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@
 <body>
 <nav>
   <span class="nav-title">Cancer Genetics Viz</span>
-  <a href="main_page.html">Home</a>
+  <a href="index.html">Home</a>
   <a href="map.html">Viz 1</a>
   <a href="linechart.html">Viz 2</a>
   <a href="barchart_phenotypes.html">Viz 3</a>
   <a href="sankey_cancer.html" class="active">Viz 4</a>
   <a href="scatter_cancer.html">Viz 5</a>
-</nav>"""
+</nav>
+<div class="page">
+  <div class="viz-page-header">
+    <span class="tag plotly">Plotly</span>
+    <h1>Chromosome → Gene → Cancer Phenotype</h1>
+    <p>How do chromosomes, genes, and cancer types flow into one another?</p>
+  </div>
+  <div class="viz-container">"""
 
 analysis = """
-<div style="padding: 0 24px 40px;">
+  </div><!-- /.viz-container -->
+
   <div class="takeaway">
     <h3>Analysis</h3>
     <p>
@@ -140,7 +148,8 @@ analysis = """
       indicating fewer confirmed genetic associations overall.
     </p>
   </div>
-</div>"""
+</div><!-- /.page -->
+"""
 
 content = content.replace("</head>\n<body>", nav, 1)
 content = content.replace("</body>", analysis + "\n</body>", 1)

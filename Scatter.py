@@ -9,35 +9,33 @@ Outputs: scatter_cancer.html
 import pandas as pd
 import altair as alt
 
-#  Load & filter data 
+# Load and filter data
 df = pd.read_excel("cancer_data.xlsx")
 df = df[df["association"] == "Y"].dropna(subset=["year"]).copy()
 df["year"] = df["year"].astype(int)
 
-# All phenotypes with at least 3 data points across years
+# Keep top 6 phenotypes only so trend lines are stable and readable
+top_phenotypes = df["phenotype"].value_counts().head(6).index.tolist()
+df = df[df["phenotype"].isin(top_phenotypes)]
+
+# Aggregate count of confirmed associations per year and phenotype
 agg = (
     df.groupby(["year", "phenotype"])
     .size()
     .reset_index(name="associations")
 )
 
-# Keep phenotypes that appear in at least 5 years so trend lines are meaningful
-valid_phenotypes = (
-    agg.groupby("phenotype")["year"].count()
-    .loc[lambda x: x >= 5]
-    .index.tolist()
+# Colour scale
+color_scale = alt.Scale(
+    domain=["breast cancer", "prostate cancer", "lung cancer",
+            "colorectal cancer", "stomach cancer", "bladder cancer"],
+    range=["#e57373", "#7986cb", "#4db6ac", "#ffa726", "#a1887f", "#90a4ae"],
 )
-agg = agg[agg["phenotype"].isin(valid_phenotypes)]
 
-#  Colour scale 
-phenotypes = sorted(agg["phenotype"].unique().tolist())
-# Use a categorical color scheme
-color_scale = alt.Scale(scheme="tableau20")
-
-#  Selection 
+# Selection for legend filtering
 phenotype_selection = alt.selection_point(fields=["phenotype"], bind="legend")
 
-#  Scatter layer — fixed dot size, no size encoding 
+# Scatter layer with fixed dot size, no size encoding
 scatter = (
     alt.Chart(agg)
     .mark_circle(size=80, stroke="#0d1117", strokeWidth=0.5)
@@ -77,7 +75,7 @@ scatter = (
     .add_params(phenotype_selection)
 )
 
-#  Polynomial trend line (order=3 captures exponential-like growth) 
+# Polynomial trend line (order 3 captures exponential-like growth better than linear)
 trend = (
     alt.Chart(agg)
     .transform_filter(phenotype_selection)
@@ -95,7 +93,7 @@ trend = (
     )
 )
 
-#  Combine & style 
+# Combine and style
 chart = (
     (scatter + trend)
     .properties(
@@ -127,7 +125,7 @@ chart = (
 
 chart.save("scatter_cancer.html")
 
-#  Inject nav + analysis into the saved HTML 
+# Inject nav and analysis block into the saved HTML
 with open("scatter_cancer.html", "r") as f:
     content = f.read()
 

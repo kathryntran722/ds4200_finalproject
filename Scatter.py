@@ -38,20 +38,20 @@ phenotype_selection = alt.selection_point(fields=["phenotype"], bind="legend")
 # Scatter layer with fixed dot size, no size encoding
 scatter = (
     alt.Chart(agg)
-    .mark_circle(size=80, stroke="#0d1117", strokeWidth=0.5)
+    .mark_circle(size=80, stroke="#ffffff", strokeWidth=0.5)
     .encode(
         x=alt.X(
             "year:Q",
             title="Publication Year",
             scale=alt.Scale(domain=[1986, 2008]),
-            axis=alt.Axis(format="d", grid=True, gridColor="#1a2535", tickColor="#1a2535",
-                          labelColor="#7a8899", titleColor="#7a8899"),
+            axis=alt.Axis(format="d", grid=True, gridColor="#e0e0e0", tickColor="#ccc",
+                          labelColor="#555", titleColor="#333"),
         ),
         y=alt.Y(
             "associations:Q",
             title="Number of Confirmed Associations",
-            axis=alt.Axis(grid=True, gridColor="#1a2535", tickColor="#1a2535",
-                          labelColor="#7a8899", titleColor="#7a8899"),
+            axis=alt.Axis(grid=True, gridColor="#e0e0e0", tickColor="#ccc",
+                          labelColor="#555", titleColor="#333"),
         ),
         color=alt.Color(
             "phenotype:N",
@@ -60,8 +60,8 @@ scatter = (
             legend=alt.Legend(
                 orient="bottom",
                 columns=3,
-                labelColor="#cdd7e4",
-                titleColor="#9aabb8",
+                labelColor="#333",
+                titleColor="#333",
                 symbolType="circle",
             ),
         ),
@@ -100,8 +100,8 @@ chart = (
         title=alt.TitleParams(
             text="Genetic Associations Over Time by Cancer Phenotype",
             subtitle="Confirmed gene-cancer associations (Y) · Click legend to filter · Dashed lines = polynomial trend",
-            color="#f0e9d6",
-            subtitleColor="#7a8899",
+            color="#333",
+            subtitleColor="#666",
             fontSize=18,
             subtitleFontSize=12,
             anchor="middle",
@@ -109,17 +109,17 @@ chart = (
         ),
         width=760,
         height=460,
-        background="#0d1117",
+        background="#ffffff",
     )
     .configure_view(strokeWidth=0)
     .configure_axis(
-        labelFont="Courier New, monospace",
-        titleFont="Courier New, monospace",
-        domainColor="#1e2d42",
+        labelFont="Open Sans, sans-serif",
+        titleFont="Open Sans, sans-serif",
+        domainColor="#ccc",
     )
     .configure_legend(
-        labelFont="Courier New, monospace",
-        titleFont="Courier New, monospace",
+        labelFont="Open Sans, sans-serif",
+        titleFont="Open Sans, sans-serif",
     )
 )
 

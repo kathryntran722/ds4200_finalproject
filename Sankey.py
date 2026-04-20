@@ -74,7 +74,7 @@ fig = go.Figure(go.Sankey(
     node=dict(
         pad=16,
         thickness=22,
-        line=dict(color="#0d1117", width=0.5),
+        line=dict(color="#ffffff", width=0.5),
         label=all_nodes,
         color=node_colors,
         hovertemplate="<b>%{label}</b><br>Total flow: %{value}<extra></extra>",
@@ -85,7 +85,7 @@ fig = go.Figure(go.Sankey(
         value=values,
         label=link_labels,
         hovertemplate="%{label}<extra></extra>",
-        color="rgba(255,255,255,0.08)",
+        color="rgba(0,0,0,0.06)",
     ),
 ))
 
@@ -93,12 +93,12 @@ fig.update_layout(
     title=dict(
         text="Chromosome -> Gene -> Cancer Phenotype<br>"
              "<sup>Confirmed genetic associations (Y) · Top chromosomes, genes & phenotypes by count</sup>",
-        font=dict(size=18, color="#f0e9d6", family="Georgia, serif"),
+        font=dict(size=18, color="#1a1a2e", family="Georgia, serif"),
         x=0.5,
     ),
-    font=dict(size=12, color="#cdd7e4", family="Courier New, monospace"),
-    paper_bgcolor="#0d1117",
-    plot_bgcolor="#0d1117",
+    font=dict(size=12, color="#333", family="Open Sans, sans-serif"),
+    paper_bgcolor="#ffffff",
+    plot_bgcolor="#ffffff",
     height=700,
     margin=dict(l=20, r=20, t=90, b=20),
 )
